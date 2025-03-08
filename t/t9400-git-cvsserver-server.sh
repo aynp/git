@@ -254,7 +254,7 @@ test_expect_success 'gitcvs.enabled = false' \
      true
    fi &&
    grep "GITCVS emulation disabled" cvs.log &&
-   test ! -d cvswork2'
+   test_path_is_missing cvswork2'
 
 rm -fr cvswork2
 test_expect_success 'gitcvs.ext.enabled = true' '
@@ -276,7 +276,7 @@ test_expect_success 'gitcvs.ext.enabled = false' '
 		true
 	fi &&
 	grep "GITCVS emulation disabled" cvs.log &&
-	test ! -d cvswork2
+	test_path_is_missing cvswork2
 '
 
 rm -fr cvswork2
@@ -285,7 +285,7 @@ test_expect_success 'gitcvs.dbname' '
 	GIT_DIR="$SERVERDIR" git config gitcvs.dbname %Ggitcvs.%a.%m.sqlite &&
 	GIT_CONFIG="$git_config" cvs -Q co -d cvswork2 main >cvs.log 2>&1 &&
 	test_cmp cvswork cvswork2 &&
-	test -f "$SERVERDIR/gitcvs.ext.main.sqlite" &&
+	test_path_is_file_not_symlink "$SERVERDIR/gitcvs.ext.main.sqlite" &&
 	cmp "$SERVERDIR/gitcvs.main.sqlite" "$SERVERDIR/gitcvs.ext.main.sqlite"
 '
 
@@ -296,8 +296,8 @@ test_expect_success 'gitcvs.ext.dbname' '
 	GIT_DIR="$SERVERDIR" git config gitcvs.dbname %Ggitcvs2.%a.%m.sqlite &&
 	GIT_CONFIG="$git_config" cvs -Q co -d cvswork2 main >cvs.log 2>&1 &&
 	test_cmp cvswork cvswork2 &&
-	test -f "$SERVERDIR/gitcvs1.ext.main.sqlite" &&
-	test ! -f "$SERVERDIR/gitcvs2.ext.main.sqlite" &&
+	test_path_is_file_not_symlink "$SERVERDIR/gitcvs1.ext.main.sqlite" &&
+	test_path_is_missing "$SERVERDIR/gitcvs2.ext.main.sqlite" &&
 	cmp "$SERVERDIR/gitcvs.main.sqlite" "$SERVERDIR/gitcvs1.ext.main.sqlite"
 '
 
@@ -346,7 +346,7 @@ test_expect_failure "cvs update w/o -d doesn't create subdir (TODO)" '
 	git push gitcvs.git >/dev/null &&
 	cd cvswork &&
 	GIT_CONFIG="$git_config" cvs -Q update &&
-	test ! -d test
+	test_path_is_missing test
 '
 
 cd "$WORKDIR"
@@ -379,7 +379,7 @@ test_expect_success 'cvs update (delete file)' '
 	cd cvswork &&
 	GIT_CONFIG="$git_config" cvs -Q update &&
 	test -z "$(grep testfile1 CVS/Entries)" &&
-	test ! -f testfile1
+	test_path_is_missing testfile1
 '
 
 cd "$WORKDIR"
